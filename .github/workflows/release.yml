@@ -1,0 +1,44 @@
+name: Release
+
+on:
+  push:
+    branches: [main]
+
+permissions: {}
+
+concurrency:
+  group: release
+  cancel-in-progress: false
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    permissions:
+      contents: write # changesets commits the version bump and tags the release
+      pull-requests: write # and opens the "Version Packages" PR
+      # Trusted Publishing: npm mints a short-lived credential from this OIDC token,
+      # so there is no NPM_TOKEN secret to leak or rotate. Also what signs provenance.
+      # ONE-TIME SETUP on npmjs.com → package → Settings → Trusted Publisher:
+      # org `Timonwa`, repo `react-hooks`, workflow `release.yml`.
+      id-token: write
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          # Changesets needs history to work out what has already been released.
+          fetch-depth: 0
+
+      - uses: ./.github/actions/setup
+
+      - run: pnpm build
+
+      # Opens a version PR when changesets are pending; publishes when that PR is
+      # merged. So a release is a reviewed merge, never a surprise from a push.
+      # v2 renamed every input from v1 (publish -> publish-script, and so on), and
+      # github-token now defaults to the workflow token rather than reading an env var.
+      - uses: changesets/action@198f833dd7d863100ea6e28967bc9a9fdefadb0a # v2.1.0
+        with:
+          publish-script: pnpm release
+          version-script: pnpm changeset version
+          commit-message: "chore(release): version packages"
+          pr-title: "chore(release): version packages"

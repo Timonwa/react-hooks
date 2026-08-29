@@ -1,0 +1,10 @@
+node_modules/
+dist/
+coverage/
+*.tsbuildinfo
+.DS_Store
+.turbo/
+
+# Working notes — private, never published
+MIGRATION.md
+DESIGN.md

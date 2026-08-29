@@ -1,0 +1,38 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+# Deny by default; each job grants only what it needs.
+permissions: {}
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          # Changesets needs history to work out what has already been released.
+          fetch-depth: 0
+
+      - uses: ./.github/actions/setup
+
+      - run: pnpm typecheck
+      - run: pnpm lint
+      - run: pnpm test
+      - run: pnpm build
+
+      # The two checks that catch a package which builds fine but cannot be
+      # imported: publint validates the manifest, attw resolves the types the way
+      # a real consumer would under every module resolution mode.
+      - run: pnpm check:publish
+      - run: pnpm check:exports
