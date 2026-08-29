@@ -3,6 +3,7 @@
 Typed React hooks for the DOM problems every app hits — theming with flash-free dark mode, media queries, cookie consent, countdowns, object URLs that never leak, click-outside, overlay dismissal, tab visibility, and page titles. Client-side by design and framework-agnostic: nothing here assumes Next.js, a router, a CSS library, or any state library.
 
 [![npm](https://img.shields.io/npm/v/@timonwa/react-hooks)](https://www.npmjs.com/package/@timonwa/react-hooks)
+[![Buy Me a Coffee](https://img.shields.io/badge/Buy%20Me%20a%20Coffee-timonwa-FFDD00?logo=buymeacoffee&logoColor=black)](https://www.buymeacoffee.com/timonwa)
 
 Ships ESM and CJS with type declarations and a `"use client"` banner, so React Server Component frameworks (Next.js App Router, etc.) get a clear client-boundary error instead of a cryptic hooks crash.
 
