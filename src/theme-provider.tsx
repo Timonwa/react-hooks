@@ -1,14 +1,26 @@
 /**
- * @description Theme context backed by localStorage + OS `prefers-color-scheme`.
- * Exports `<ThemeProvider>` and the `useTheme()` hook. The inline `<ThemeScript />`
- * in `<head>` applies the dark class before hydration, so initial render matches
- * SSR with no flash.
+ * @description Light/dark/system theme management for any React app, framework-
+ * and CSS-library-agnostic. The user's choice persists in localStorage,
+ * `"system"` follows the OS `prefers-color-scheme` live, and the resolved theme
+ * is written to `<html>` as either a `.dark` class or a `data-theme` attribute —
+ * your stylesheets key off whichever you pick:
+ *
+ * - Tailwind v4 manual dark mode: `@custom-variant dark (&:where(.dark, .dark *));`
+ *   with `attribute="class"` (the default), or the `[data-theme=dark]` variant
+ *   with `attribute="data-theme"`.
+ * - Plain CSS / CSS variables: `.dark { --bg: … }` or `[data-theme="dark"] { … }`.
+ *
+ * `<ThemeProvider>` inlines a tiny pre-hydration script that applies the stored
+ * theme before first paint, so there is no flash of the wrong theme on SSR'd
+ * pages. Add `suppressHydrationWarning` to `<html>` (the script mutates it
+ * before React hydrates). `<ThemeScript />` is also exported separately for
+ * placing in `<head>` when the provider itself mounts late (e.g. lazily).
  *
  * @example
- * // 1. Wrap app
+ * // 1. Wrap the app
  * <ThemeProvider>{children}</ThemeProvider>
  *
- * // 2. Consume theme
+ * // 2. Consume
  * const { theme, resolvedTheme, setTheme } = useTheme();
  * <button onClick={() => setTheme("dark")}>Dark mode</button>
  */
@@ -45,8 +57,8 @@ function getStored(storageKey: string): ThemeChoiceType {
   return "system";
 }
 
-/** How the resolved theme is written to <html>: a `.dark` class (Tailwind's
- * class variant) or a `data-theme` attribute (`[data-theme="dark"]` selectors). */
+/** How the resolved theme is written to `<html>`: a `.dark` class or a
+ * `data-theme` attribute (`[data-theme="dark"]` selectors). */
 export type ThemeAttributeType = "class" | "data-theme";
 
 function applyTheme(resolved: ResolvedThemeType, attribute: ThemeAttributeType) {
@@ -60,13 +72,39 @@ function applyTheme(resolved: ResolvedThemeType, attribute: ThemeAttributeType) 
   else root.classList.remove("dark");
 }
 
+interface ThemeScriptProps {
+  /** localStorage key the choice persists under. Must match the provider's. */
+  storageKey?: string;
+  /** Theme used before a stored choice exists. Must match the provider's. */
+  defaultTheme?: ThemeChoiceType;
+  /** How the theme is written to `<html>`. Must match the provider's. */
+  attribute?: ThemeAttributeType;
+}
+
+/**
+ * Inline pre-hydration script that applies the stored theme to `<html>` before
+ * first paint. `<ThemeProvider>` renders it automatically; use this directly
+ * only when the provider mounts too late to beat the first paint.
+ */
+export function ThemeScript({
+  storageKey = "theme",
+  defaultTheme = "system",
+  attribute = "class",
+}: ThemeScriptProps) {
+  // Serialized IIFE mirror of getStored + getSystemPref + applyTheme — it must
+  // run before React loads, so it can't share their function objects.
+  const script = `(function(){try{var k=${JSON.stringify(storageKey)},a=${JSON.stringify(attribute)},d=${JSON.stringify(defaultTheme)};var s=null;try{s=localStorage.getItem(k)}catch(e){}var t=s==="light"||s==="dark"||s==="system"?s:d;var r=t==="system"?(matchMedia("(prefers-color-scheme: dark)").matches?"dark":"light"):t;var h=document.documentElement;if(a==="data-theme"){h.setAttribute("data-theme",r)}else if(r==="dark"){h.classList.add("dark")}}catch(e){}})();`;
+  // biome-ignore lint/security/noDangerouslySetInnerHtml: the script is built purely from JSON-serialized props
+  return <script dangerouslySetInnerHTML={{ __html: script }} />;
+}
+
 interface ThemeProviderProps {
   children: ReactNode;
   /** localStorage key the choice persists under. */
   storageKey?: string;
   /** Theme used before a stored choice exists. */
   defaultTheme?: ThemeChoiceType;
-  /** How the theme is written to <html>. Default: a `.dark` class. */
+  /** How the theme is written to `<html>`. Default: a `.dark` class. */
   attribute?: ThemeAttributeType;
 }
 
@@ -116,6 +154,7 @@ export function ThemeProvider({
 
   return (
     <ThemeContext.Provider value={{ theme, resolvedTheme, setTheme }}>
+      <ThemeScript storageKey={storageKey} defaultTheme={defaultTheme} attribute={attribute} />
       {children}
     </ThemeContext.Provider>
   );

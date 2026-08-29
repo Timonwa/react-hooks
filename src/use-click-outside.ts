@@ -1,7 +1,13 @@
 /**
- * @description Fires a callback when a mousedown lands outside the given ref(s).
- * Accepts a single ref, an array of refs, or a record of refs — the callback
- * fires only when the click is outside all of them.
+ * @description Fires a callback when a pointer press (mouse, touch, or pen)
+ * lands outside the given ref(s). Accepts a single ref, an array of refs, or a
+ * record of refs — the callback fires only when the press is outside all of
+ * them, which is what a menu plus its trigger button needs.
+ *
+ * This is the dismissal for non-modal floating UI — dropdowns, popovers,
+ * tooltips, comboboxes — where the page behind stays interactive. Modal
+ * surfaces (dialogs, drawers, bottom sheets) should use `useOverlayDismiss`
+ * for Escape/scroll-lock/focus and handle clicks on their own backdrop.
  *
  * @param options.refs - Element ref(s) to detect clicks outside of
  * @param options.enabled - Whether the listener is active (default: true)
@@ -35,7 +41,7 @@ export function useClickOutside({
   onClickOutside,
 }: UseClickOutsideOptionsProps): void {
   const handleClickOutside = useCallback(
-    (event: MouseEvent) => {
+    (event: PointerEvent) => {
       if (!enabled) return;
 
       const target = event.target as Node;
@@ -72,10 +78,11 @@ export function useClickOutside({
   useEffect(() => {
     if (!enabled) return;
 
-    document.addEventListener("mousedown", handleClickOutside);
+    // pointerdown covers mouse, touch, and pen with a single listener.
+    document.addEventListener("pointerdown", handleClickOutside);
 
     return () => {
-      document.removeEventListener("mousedown", handleClickOutside);
+      document.removeEventListener("pointerdown", handleClickOutside);
     };
   }, [enabled, handleClickOutside]);
 }

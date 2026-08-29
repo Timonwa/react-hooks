@@ -1,6 +1,7 @@
 /**
- * @description Media-query subscription — the only way to branch on a
- * breakpoint in JS, since a class cannot toggle logic.
+ * @description Live media-query subscription — for branching rendering or
+ * behaviour on a breakpoint (or any media feature) in JS, which CSS alone
+ * cannot do.
  */
 
 "use client";

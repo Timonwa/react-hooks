@@ -1,8 +1,9 @@
 /**
- * @description Navbar-driven page title (Linear/Notion pattern). Wrap the layout
- * once with `<PageTitleProvider>`; pages call `usePageTitle("…")` to register
- * the title for as long as they're mounted, and the navbar reads `title` via
- * the same hook. Clears on unmount, so navigation resets the title automatically.
+ * @description Shell-rendered page title (the Linear/Notion pattern: the page
+ * declares its title, a shared header displays it). Wrap the layout once with
+ * `<PageTitleProvider>`; pages call `usePageTitle("…")` to register the title
+ * for as long as they're mounted, and the header/navbar reads `title` via the
+ * same hook. Clears on unmount, so navigation resets the title automatically.
  *
  * @param title - String to set as the title, or omit to read the current value
  * @returns `{ title, setTitle }`

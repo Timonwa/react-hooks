@@ -1,6 +1,7 @@
 /**
  * @description The modal-overlay shell: Escape-to-dismiss, scroll lock, focus
- * handling.
+ * handling. For any surface that takes over the page — not for non-modal
+ * popups (dropdowns, tooltips, popovers), where use-click-outside fits.
  */
 
 "use client";
@@ -8,10 +9,19 @@
 import { type RefObject, useEffect, useRef } from "react";
 
 /**
- * The overlay behaviours drawers and dialogs share: Escape-to-dismiss, body
+ * The behaviours every modal overlay shares — dialogs, drawers, bottom sheets,
+ * command palettes, lightboxes, full-screen nav: Escape-to-dismiss, body
  * scroll-lock while open, and focus handling — moves focus into the panel
  * (preferring an explicit `[data-autofocus]` target) and restores it on close.
- * Click-outside stays with each overlay's own backdrop.
+ *
+ * Use it for surfaces that take over the page and block interaction behind
+ * them; those behaviours are what make a modal accessible, so none are
+ * optional. Do not use it for non-modal floating UI (dropdowns, tooltips,
+ * popovers) — the page behind those stays interactive, so scroll-locking it or
+ * moving focus would be a bug; reach for `useClickOutside` there instead.
+ * Click-outside is deliberately not included here — modals vary on
+ * backdrop-click behaviour, so that stays with each overlay's own backdrop.
+ * Pair with `useMountTransition` when the overlay animates in and out.
  *
  * @example useOverlayDismiss({ open, onDismiss: close, panelRef });
  */

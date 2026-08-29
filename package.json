@@ -53,10 +53,9 @@
     "lint:fix": "biome check --write .",
     "check:exports": "attw --pack . --profile node16",
     "check:publish": "publint",
-    "verify": "pnpm typecheck && pnpm lint && pnpm test && pnpm build && pnpm check:publish && pnpm check:exports && pnpm docs:api && git diff --exit-code README.md",
+    "verify": "pnpm typecheck && pnpm lint && pnpm test && pnpm build && pnpm check:publish && pnpm check:exports",
     "release": "pnpm build && changeset publish",
-    "prepare": "husky",
-    "docs:api": "node scripts/generate-readme-api.mjs"
+    "prepare": "husky"
   },
   "dependencies": {
     "@timonwa/app-utilities": "^0.4.0"

@@ -9,7 +9,7 @@
  *
  * @param items - The current list of items
  * @param getId - Stable unique id for an item (used as the map key)
- * @param getFile - The File to create an object URL for
+ * @param getFile - The Blob/File to create an object URL for
  * @returns A record of id → object URL
  *
  * @example
@@ -25,7 +25,7 @@ import { useEffect, useRef, useState } from "react";
 export function useObjectUrlMap<T>(
   items: T[],
   getId: (item: T) => string,
-  getFile: (item: T) => File,
+  getFile: (item: T) => Blob,
 ): Record<string, string> {
   const [urlMap, setUrlMap] = useState<Record<string, string>>({});
   const trackedRef = useRef<Set<string>>(new Set());
