@@ -25,55 +25,13 @@ function Search() {
 }
 ```
 
-## Hooks at a glance
-
-**Theming and appearance**
+## Theming and appearance
 
 | Hook | What it does |
 | --- | --- |
 | [`ThemeProvider` / `useTheme` / `ThemeScript`](#theming) | Light/dark/system theme with persistence and no flash of the wrong theme |
 | [`useMediaQuery`](#usemediaquery) | Live media-query matching, SSR-safe |
 | [`usePrefersReducedMotion`](#useprefersreducedmotion) | The user's reduced-motion preference, live |
-
-**Overlays and transitions**
-
-| Hook | What it does |
-| --- | --- |
-| [`useClickOutside`](#useclickoutside) | Dismissal for non-modal floating UI (dropdowns, popovers, tooltips) |
-| [`useMountTransition`](#usemounttransition) | Enter/exit CSS transitions for anything that mounts and unmounts |
-| [`useOverlayDismiss`](#useoverlaydismiss) | The modal shell — Escape, scroll lock, and focus handling for dialogs, drawers, sheets, palettes |
-
-**Timing**
-
-| Hook | What it does |
-| --- | --- |
-| [`useCountdown`](#usecountdown) | Ticks from N seconds down to 0, with an `M:SS` label |
-| [`useDebouncedValue`](#usedebouncedvalue) | Debounced copy of a fast-changing value |
-
-**Forms and scrolling**
-
-| Hook | What it does |
-| --- | --- |
-| [`useFormErrorScroll`](#useformerrorscroll) | Scrolls a form into view and surfaces the first error on invalid submit |
-| [`useScrollIntoView`](#usescrollintoview) | Smoothly scrolls a ref'd element into view — position, behaviour, and offset configurable |
-
-**Files and clipboard**
-
-| Hook | What it does |
-| --- | --- |
-| [`useCopyFeedback`](#usecopyfeedback) | Clipboard write plus the transient "Copied" state |
-| [`useObjectUrl`](#useobjecturl) | Object URL for a single Blob/File, revoked on cleanup |
-| [`useObjectUrlMap`](#useobjecturlmap) | Object URLs for a dynamic list, created and revoked as items come and go |
-
-**Page and browser state**
-
-| Hook | What it does |
-| --- | --- |
-| [`useCookieConsent`](#usecookieconsent) | Reactive cookie-consent state for any consent platform, via adapters |
-| [`usePageTitle`](#usepagetitle) | Page-declared titles rendered by a shared header (the Linear/Notion pattern) |
-| [`useVisibilityChange`](#usevisibilitychange) | Callbacks when the tab is hidden or becomes visible again |
-
-## Theming and appearance
 
 ### Theming
 
@@ -168,6 +126,12 @@ element.scrollIntoView({ behavior: skipAnimation ? "auto" : "smooth" });
 
 ## Overlays and transitions
 
+| Hook | What it does |
+| --- | --- |
+| [`useClickOutside`](#useclickoutside) | Dismissal for non-modal floating UI (dropdowns, popovers, tooltips) |
+| [`useMountTransition`](#usemounttransition) | Enter/exit CSS transitions for anything that mounts and unmounts |
+| [`useOverlayDismiss`](#useoverlaydismiss) | The modal shell — Escape, scroll lock, and focus handling for dialogs, drawers, sheets, palettes |
+
 ### useClickOutside
 
 ```ts
@@ -232,7 +196,7 @@ useOverlayDismiss(options: {
 }): void
 ```
 
-The behaviours every **modal** overlay shares, in one hook: **Escape** calls `onDismiss`, the body is scroll-locked while `open`, and focus management is handled — focus moves into the panel when it opens (preferring an element marked `[data-autofocus]`, else the first focusable element, else the panel itself) and returns to the previously focused element on close.
+The behaviours every **modal** overlay shares, in one hook: **Escape** calls `onDismiss`, the body is scroll-locked while `open`, and focus management is handled — focus moves into the panel when it opens (preferring an element marked `[data-autofocus]`, else the first focusable element, else the panel itself), **Tab and Shift+Tab cycle within the panel** while it's open (the WAI-ARIA dialog pattern), and focus returns to the previously focused element on close.
 
 **When to use it:** any surface that takes over the page and blocks interaction behind it — dialogs, drawers, bottom sheets, command palettes (⌘K), image lightboxes, full-screen mobile nav. Escape, scroll lock, and focus handling are what make a modal accessible, so none of them are optional.
 
@@ -255,6 +219,11 @@ function Drawer({ open, onClose, children }) {
 ```
 
 ## Timing
+
+| Hook | What it does |
+| --- | --- |
+| [`useCountdown`](#usecountdown) | Ticks from N seconds down to 0, with an `M:SS` label |
+| [`useDebouncedValue`](#usedebouncedvalue) | Debounced copy of a fast-changing value |
 
 ### useCountdown
 
@@ -295,6 +264,11 @@ useEffect(() => {
 ```
 
 ## Forms and scrolling
+
+| Hook | What it does |
+| --- | --- |
+| [`useFormErrorScroll`](#useformerrorscroll) | Scrolls a form into view and surfaces the first error on invalid submit |
+| [`useScrollIntoView`](#usescrollintoview) | Smoothly scrolls a ref'd element into view — position, behaviour, and offset configurable |
 
 ### useFormErrorScroll
 
@@ -342,6 +316,12 @@ const { ref, scrollIntoView } = useScrollIntoView<HTMLLIElement>({ block: "cente
 
 ## Files and clipboard
 
+| Hook | What it does |
+| --- | --- |
+| [`useCopyFeedback`](#usecopyfeedback) | Clipboard write plus the transient "Copied" state |
+| [`useObjectUrl`](#useobjecturl) | Object URL for a single Blob/File, revoked on cleanup |
+| [`useObjectUrlMap`](#useobjecturlmap) | Object URLs for a dynamic list, created and revoked as items come and go |
+
 ### useCopyFeedback
 
 ```ts
@@ -354,10 +334,14 @@ useCopyFeedback(feedbackMs?: number): { // feedbackMs default: 2000
 
 Clipboard write plus the transient "Copied" state every copy button repeats. The state is keyed rather than boolean so a **list** can show feedback on just the row that was copied; callers with a single button ignore the key entirely. `copy` returns whether the write succeeded rather than handling failure itself — the clipboard is blocked in insecure (non-HTTPS) contexts, and each app words that error differently.
 
+Announce the state change to screen readers with an `aria-live` region — the visual label swap alone is silent:
+
 ```tsx
 // Single button
 const { copy, isCopied } = useCopyFeedback();
-<button onClick={() => copy(inviteUrl)}>{isCopied() ? "Copied!" : "Copy link"}</button>;
+<button onClick={() => copy(inviteUrl)}>
+  <span aria-live="polite">{isCopied() ? "Copied!" : "Copy link"}</span>
+</button>;
 
 // List — each row keys its own feedback
 const { copy, isCopied } = useCopyFeedback();
@@ -407,6 +391,12 @@ function UploadQueue({ queue }: { queue: QueueItem[] }) {
 ```
 
 ## Page and browser state
+
+| Hook | What it does |
+| --- | --- |
+| [`useCookieConsent`](#usecookieconsent) | Reactive cookie-consent state for any consent platform, via adapters |
+| [`usePageTitle`](#usepagetitle) | Page-declared titles rendered by a shared header (the Linear/Notion pattern) |
+| [`useVisibilityChange`](#usevisibilitychange) | Callbacks when the tab is hidden or becomes visible again |
 
 ### useCookieConsent
 

@@ -8,11 +8,18 @@
 
 import { type RefObject, useEffect, useRef } from "react";
 
+// What the trap and the initial focus consider focusable. Deliberately the
+// practical subset — not a full tabbability engine.
+const FOCUSABLE_SELECTOR =
+  "a[href], button:not([disabled]), input:not([disabled]), textarea:not([disabled]), select:not([disabled]), [tabindex]:not([tabindex='-1'])";
+
 /**
  * The behaviours every modal overlay shares — dialogs, drawers, bottom sheets,
  * command palettes, lightboxes, full-screen nav: Escape-to-dismiss, body
  * scroll-lock while open, and focus handling — moves focus into the panel
- * (preferring an explicit `[data-autofocus]` target) and restores it on close.
+ * (preferring an explicit `[data-autofocus]` target), traps Tab / Shift+Tab
+ * inside it while open (the WAI-ARIA dialog pattern), and restores focus on
+ * close.
  *
  * Use it for surfaces that take over the page and block interaction behind
  * them; those behaviours are what make a modal accessible, so none are
@@ -50,15 +57,48 @@ export function useOverlayDismiss({
       if (event.key === "Escape") {
         event.stopPropagation();
         onDismissRef.current();
+        return;
+      }
+
+      // Trap Tab inside the panel: cycle from the last focusable back to the
+      // first (and the reverse for Shift+Tab), and pull focus back in when it
+      // has escaped to the page behind.
+      if (event.key === "Tab") {
+        const panel = panelRef.current;
+        if (!panel) return;
+        const focusables = Array.from(
+          panel.querySelectorAll<HTMLElement>(FOCUSABLE_SELECTOR),
+        );
+        if (focusables.length === 0) {
+          event.preventDefault();
+          panel.focus();
+          return;
+        }
+        const first = focusables[0];
+        const last = focusables[focusables.length - 1];
+        if (!first || !last) return;
+        const active = document.activeElement;
+        if (event.shiftKey) {
+          if (active === first || !panel.contains(active)) {
+            event.preventDefault();
+            last.focus();
+          }
+        } else if (active === last || !panel.contains(active)) {
+          event.preventDefault();
+          first.focus();
+        }
       }
     };
     document.addEventListener("keydown", onKeyDown);
 
     // Prefer an explicit [data-autofocus] target, else the first focusable.
+    // Two queries, not one comma-joined selector — querySelector returns the
+    // first match in DOCUMENT order, which would ignore the preference.
+    const panel = panelRef.current;
     const focusTarget =
-      panelRef.current?.querySelector<HTMLElement>(
-        "[data-autofocus], input, button, textarea, select, [tabindex]:not([tabindex='-1'])",
-      ) ?? panelRef.current;
+      panel?.querySelector<HTMLElement>("[data-autofocus]") ??
+      panel?.querySelector<HTMLElement>(FOCUSABLE_SELECTOR) ??
+      panel;
     focusTarget?.focus();
 
     return () => {
