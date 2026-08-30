@@ -46,15 +46,15 @@ function getSystemPref(): ResolvedThemeType {
   return window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light";
 }
 
-function getStored(storageKey: string): ThemeChoiceType {
-  if (typeof window === "undefined") return "system";
+function getStored(storageKey: string, fallback: ThemeChoiceType): ThemeChoiceType {
+  if (typeof window === "undefined") return fallback;
   try {
     const v = window.localStorage.getItem(storageKey);
     if (v === "light" || v === "dark" || v === "system") return v;
   } catch {
     /* localStorage unavailable */
   }
-  return "system";
+  return fallback;
 }
 
 /** How the resolved theme is written to `<html>`: a `.dark` class or a
@@ -118,12 +118,12 @@ export function ThemeProvider({
   const [resolvedTheme, setResolvedTheme] = useState<ResolvedThemeType>("light");
 
   useEffect(() => {
-    const stored = getStored(storageKey);
+    const stored = getStored(storageKey, defaultTheme);
     const next = stored === "system" ? getSystemPref() : stored;
     setThemeState(stored);
     setResolvedTheme(next);
     applyTheme(next, attribute);
-  }, [storageKey, attribute]);
+  }, [storageKey, defaultTheme, attribute]);
 
   useEffect(() => {
     if (theme !== "system") return;
