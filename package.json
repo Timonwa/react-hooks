@@ -1,6 +1,6 @@
 {
   "name": "@timonwa/react-hooks",
-  "version": "0.1.1",
+  "version": "0.1.2",
   "description": "Typed React hooks for the DOM problems every app hits — theme, media queries, countdowns, object URLs, click-outside, visibility, page titles. Client-side by design, no framework assumptions.",
   "keywords": [
     "react",
