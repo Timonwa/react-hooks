@@ -30,7 +30,9 @@ jobs:
 
       - uses: ./.github/actions/setup
 
-      - run: pnpm build
+      # This job runs alongside CI on the same push, not after it, so it has to
+      # prove the commit itself is releasable — otherwise a red CI still publishes.
+      - run: pnpm verify
 
       # Opens a version PR when changesets are pending; publishes when that PR is
       # merged. So a release is a reviewed merge, never a surprise from a push.
