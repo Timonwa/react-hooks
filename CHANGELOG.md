@@ -1,5 +1,11 @@
 # @timonwa/react-hooks
 
+## 0.1.2
+
+### Patch Changes
+
+- [`57711e7`](https://github.com/Timonwa/react-hooks/commit/57711e70374f593b72bcdac9c87cf049e5cb12ef) Thanks [@Timonwa](https://github.com/Timonwa)! - `ThemeProvider` now honours its `defaultTheme` prop when no choice is stored. It previously fell back to `"system"` regardless, contradicting the pre-hydration `ThemeScript`, which applied `defaultTheme` correctly — so `<ThemeProvider defaultTheme="dark">` flipped to the OS preference on hydration.
+
 ## 0.1.1
 
 ### Patch Changes
