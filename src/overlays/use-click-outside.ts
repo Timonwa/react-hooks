@@ -55,9 +55,7 @@ export function useClickOutside({
       }
 
       if (Array.isArray(refs)) {
-        const isOutside = refs.every(
-          (ref) => !ref.current || !ref.current.contains(target),
-        );
+        const isOutside = refs.every((ref) => !ref.current?.contains(target));
         if (isOutside) {
           onClickOutside();
         }
@@ -65,9 +63,7 @@ export function useClickOutside({
       }
 
       const refValues = Object.values(refs);
-      const isOutside = refValues.every(
-        (ref) => !ref.current || !ref.current.contains(target),
-      );
+      const isOutside = refValues.every((ref) => !ref.current?.contains(target));
       if (isOutside) {
         onClickOutside();
       }
