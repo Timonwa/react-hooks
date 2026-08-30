@@ -19,11 +19,11 @@ pnpm verify   # typecheck, lint, test, build, publint, attw — the same gate CI
 
 ## Adding a hook
 
-- **One file per hook**, kebab-cased after it, flat in `src/` — `src/use-debounced-value.ts`. Start the file with a `"use client"` directive and a JSDoc block; the JSDoc is what editors show, so keep it agreeing with the README.
+- **One file per hook**, kebab-cased after it, inside the group folder it belongs to (`theming/`, `overlays/`, `timing/`, `forms/`, `files/`, `browser/`) — `src/timing/use-debounced-value.ts` — with its test file beside it (`use-debounced-value.test.ts`). Start the file with a `"use client"` directive and a JSDoc block; the JSDoc is what editors show, so keep it agreeing with the README.
 - **SSR-safe.** Guard every browser API for being absent so a server render degrades (deterministic snapshot) instead of throwing.
-- **Export it explicitly** from `src/index.ts`, one line per file, alphabetical.
+- **Export it explicitly** from its group's `index.ts` barrel, one line per file, alphabetical — `src/index.ts` only re-exports the folder barrels.
 - **Document it in `README.md` in the same change** — the README is the only documentation. Add the hook to its group's at-a-glance table and give it a section (signature, options with defaults, example), alphabetical within the group.
-- **Tests go through the barrel** (`import { … } from "./index.js"`) and cover the edges, not the happy path alone — the unmount, the disabled state, the absent browser API.
+- **Tests go through the root barrel** (`import { … } from "../index.js"`) and cover the edges, not the happy path alone — the unmount, the disabled state, the absent browser API. Fakes shared across groups live in `src/_test-helpers.tsx`, which no barrel exports.
 
 ## Submitting a change
 

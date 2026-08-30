@@ -1,31 +1,35 @@
-// The public surface — one explicit export line per file.
+// The public surface — one folder per README group, explicit exports in each barrel.
+export {
+  type CookieConsentAdapter,
+  createVanillaCookieConsentAdapter,
+  PageTitleProvider,
+  useCookieConsent,
+  usePageTitle,
+  useVisibilityChange,
+} from "./browser/index.js";
+export {
+  useCopyFeedback,
+  useObjectUrl,
+  useObjectUrlMap,
+} from "./files/index.js";
+export {
+  type UseScrollIntoViewOptions,
+  useFormErrorScroll,
+  useScrollIntoView,
+} from "./forms/index.js";
+export {
+  useClickOutside,
+  useMountTransition,
+  useOverlayDismiss,
+} from "./overlays/index.js";
 export {
   type ResolvedThemeType,
   type ThemeAttributeType,
   type ThemeChoiceType,
   ThemeProvider,
   ThemeScript,
+  useMediaQuery,
+  usePrefersReducedMotion,
   useTheme,
-} from "./theme-provider.js";
-export { useClickOutside } from "./use-click-outside.js";
-export {
-  type CookieConsentAdapter,
-  createVanillaCookieConsentAdapter,
-  useCookieConsent,
-} from "./use-cookie-consent.js";
-export { useCopyFeedback } from "./use-copy-feedback.js";
-export { useCountdown } from "./use-countdown.js";
-export { useDebouncedValue } from "./use-debounced-value.js";
-export { useFormErrorScroll } from "./use-form-error-scroll.js";
-export { useMediaQuery } from "./use-media-query.js";
-export { useMountTransition } from "./use-mount-transition.js";
-export { useObjectUrl } from "./use-object-url.js";
-export { useObjectUrlMap } from "./use-object-url-map.js";
-export { useOverlayDismiss } from "./use-overlay-dismiss.js";
-export { PageTitleProvider, usePageTitle } from "./use-page-title.js";
-export { usePrefersReducedMotion } from "./use-prefers-reduced-motion.js";
-export {
-  type UseScrollIntoViewOptions,
-  useScrollIntoView,
-} from "./use-scroll-into-view.js";
-export { useVisibilityChange } from "./use-visibility-change.js";
+} from "./theming/index.js";
+export { useCountdown, useDebouncedValue } from "./timing/index.js";
